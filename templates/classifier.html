@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Classifier - BERTwatch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .bg-soft-red { background-color: #f87070; }
+      .text-result-red { color: #f87070; }
+      .border-result-red { border-color: #f87070; }
+      .bg-soft-green { background-color: #9ae6b4; }
+      .text-light { color: #f8fffe; }
+      .disabled-btn {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="fixed top-0 left-0 w-full z-50 bg-[#2c9a8e] text-white px-8 py-4 flex justify-between items-center shadow-md">
+      <div class="text-lg font-bold">BERTwatch</div>
+      <ul class="flex gap-8 text-white text-lg">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="classifier.html" class="font-bold">Classifier</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+    </nav>
+
+    <!-- Main -->
+    <main class="flex-grow bg-gradient-to-br from-white to-[#eaf7f5] py-16 px-4 flex justify-center items-center pt-28">
+      <div class="w-full max-w-3xl p-8 bg-white rounded-xl shadow-lg">
+
+        <!-- Title -->
+        <div class="text-center mb-6">
+          <h1 class="text-3xl font-bold text-[#2c9a8e] mb-3">
+            Trigger Warning Classifier
+          </h1>
+          <p class="text-gray-600 max-w-xl mx-auto leading-relaxed">
+            Identify sensitive topics in your text. Adding more context can help the system
+            detect trigger warning labels with greater accuracy.
+          </p>
+        </div>
+
+        <!-- Labels -->
+        <div class="mb-6">
+          <h3 class="text-xl font-semibold text-[#2c9a8e] mb-2 text-center">Possible Labels</h3>
+          <div class="border border-[#2c9a8e] px-4 py-3 rounded text-[#2c9a8e] text-sm grid grid-cols-2 gap-x-6 gap-y-2 max-w-fit mx-auto">
+            <span><strong>• Abuse</strong></span>
+            <span><strong>• Dysmorphia</strong></span>
+            <span><strong>• Death</strong></span>
+            <span><strong>• PTSD</strong></span>
+            <span><strong>• Depression</strong></span>
+            <span><strong>• Suicide</strong></span>
+            <span><strong>• Domestic Violence</strong></span>
+            <span><strong>• Eating Disorders</strong></span>
+            <span><strong>• Anxiety</strong></span>
+          </div>
+        </div>
+
+        <!-- Input -->
+        <textarea 
+          id="userInput" 
+          class="w-full h-48 p-4 rounded-lg bg-[#d9f2ef] placeholder:text-gray-500 text-gray-800 resize-none" 
+          placeholder="Type or paste your text here..." 
+          oninput="updateWordCount()"
+        ></textarea>
+
+        <p id="wordCount" class="text-[#b04450] mt-2 text-center font-medium">Words Remaining: 100</p>
+        <p id="wordLimitWarning" class="text-red-600 mt-2 text-center font-medium hidden">❌ You have exceeded the 100-word limit. Please shorten your text.</p>
+
+        <!-- Buttons -->
+        <div class="flex justify-center mt-4 gap-4">
+          <button id="classifyBtn" onclick="classifyText()" class="bg-[#2c9a8e] text-white px-6 py-2 rounded transition-all duration-300 disabled-btn" disabled>CLASSIFY</button>
+          <button id="clearBtn" onclick="clearText()" class="bg-soft-red text-white px-6 py-2 rounded transition-all duration-300 disabled-btn" disabled>CLEAR</button>
+        </div>
+
+        <!-- Results -->
+        <div id="resultContainer" class="mt-8 hidden">
+          <h3 class="text-xl font-semibold text-[#2c9a8e] mb-4 text-center">The text contains:</h3>
+          <div id="predictionBox" class="flex justify-center flex-wrap gap-3 py-4"></div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#2c9a8e] text-white text-center text-sm py-4 mt-auto">
+      © 2025 Arenas, Nones, and Tabiolo
+    </footer>
+
+    <!-- Script -->
+    <script>
+    const input = document.getElementById('userInput');
+    const wordCountDisplay = document.getElementById('wordCount');
+    const resultContainer = document.getElementById('resultContainer');
+    const predictionBox = document.getElementById('predictionBox');
+    const classifyBtn = document.getElementById('classifyBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const wordLimitWarning = document.getElementById('wordLimitWarning');
+    const MAX_WORDS = 100;
+
+    let englishWords = new Set();
+    let dictionaryLoaded = false;
+
+    // Load dictionary
+    fetch('/static/words_dictionary.json')
+      .then(res => res.json())
+      .then(data => {
+        englishWords = new Set(Object.keys(data));
+        dictionaryLoaded = true;
+        console.log('✅ English dictionary loaded:', englishWords.size, 'words');
+      })
+      .catch(err => console.error('Error loading dictionary:', err));
+
+    function updateWordCount() {
+      const text = input.value.trim();
+      const words = text.split(/\s+/).filter(word => word.length > 0);
+      const remaining = MAX_WORDS - words.length;
+
+      // Enable/disable buttons based on input
+      const hasText = text.length > 0;
+      classifyBtn.disabled = !hasText || remaining < 0;
+      clearBtn.disabled = !hasText;
+      classifyBtn.classList.toggle('disabled-btn', classifyBtn.disabled);
+      clearBtn.classList.toggle('disabled-btn', clearBtn.disabled);
+
+      // Update word count and warnings
+      if (remaining >= 0) {
+        wordCountDisplay.textContent = `Words Remaining: ${remaining}`;
+        wordLimitWarning.classList.add('hidden');
+      } else {
+        wordCountDisplay.textContent = `Word limit exceeded by ${Math.abs(remaining)}`;
+        wordLimitWarning.classList.remove('hidden');
+      }
+    }
+
+    function clearText() {
+      input.value = "";
+      predictionBox.innerHTML = "";
+      resultContainer.classList.add("hidden");
+      updateWordCount();
+    }
+
+    async function classifyText() {
+      if (!dictionaryLoaded) {
+        alert('Dictionary is still loading. Please wait a moment.');
+        return;
+      }
+
+      const text = input.value.trim();
+      const words = text.split(/\s+/).filter(w => w.length > 0);
+      const wordCount = words.length;
+
+      if (wordCount === 0 || wordCount > MAX_WORDS) {
+        alert('Please enter up to 100 words.');
+        return;
+      }
+
+      // Check if text is mostly English
+      const cleanedWords = words.map(w => w.toLowerCase().replace(/[^a-z]/g, ''));
+      const englishCount = cleanedWords.filter(w => englishWords.has(w)).length;
+      const englishRatio = englishCount / cleanedWords.length;
+
+      if (englishRatio < 0.99) {
+        alert('❌ Please enter text in English only.');
+        return;
+      }
+
+      try {
+        const response = await fetch('http://127.0.0.1:5000/api/classify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+
+        if (!response.ok) throw new Error(`Server error: ${response.status}`);
+
+        const data = await response.json();
+        const topPredictions = data.predictions
+          .sort((a, b) => b.probability - a.probability)
+          .slice(0, 3);
+
+        predictionBox.innerHTML = "";
+        topPredictions.forEach(pred => {
+          const tag = document.createElement("div");
+          tag.className = "px-4 py-2 rounded-full border border-result-red text-result-red font-bold shadow-sm";
+          tag.textContent = `${pred.label} (${(pred.probability * 100).toFixed(1)}%)`;
+          predictionBox.appendChild(tag);
+        });
+
+        resultContainer.classList.remove("hidden");
+      } catch (err) {
+        console.error(err);
+        alert('❌ There was an error classifying your text. Please try again.');
+      }
+    }
+
+    // Initialize button state on load
+    window.onload = updateWordCount;
+    </script>
+  </body>
+</html>

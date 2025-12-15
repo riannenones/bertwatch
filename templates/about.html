@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About - BERTwatch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="min-h-screen flex flex-col bg-gradient-to-br from-white to-[#eaf7f5]">
+
+    <nav class="bg-[#2c9a8e] text-white px-8 py-4 flex justify-between items-center">
+      <div class="text-lg font-bold">BERTwatch</div>
+      <ul class="flex gap-8 text-white text-lg">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="classifier.html">Classifier</a></li>
+        <li><a href="about.html" class="font-bold">About</a></li>
+      </ul>
+    </nav>
+
+    <main class="flex-grow px-4 py-16 flex flex-col items-center text-center max-w-3xl mx-auto">
+      <h1 class="text-3xl md:text-4xl font-bold text-[#2c9a8e] mb-6">About the System</h1>
+
+      <p class="text-gray-800 text-lg mb-6 text-justify">
+        <strong>BERTwatch</strong> serves as a trigger warning classification system designed to help promote safer digital spaces by automatically identifying potentially sensitive content in user-generated text. It is built to recognize nine types of trigger warnings commonly found in online discussions:
+      </p>
+
+      <div class="bg-[#fceeee] text-[#b04450] px-8 py-4 rounded-lg mb-6 text-left text-lg font-medium leading-relaxed">
+        <ul class="grid grid-cols-2 gap-x-8 list-disc list-inside">
+          <li>Abuse</li>
+          <li>Dysmorphia</li>
+          <li>Death</li>
+          <li>PTSD</li>
+          <li>Anxiety</li>
+          <li>Depression</li>
+          <li>Suicide</li>
+          <li>Domestic Violence</li>
+          <li>Eating Disorder</li>
+        </ul>
+      </div>
+
+      <p class="text-gray-800 text-lg text-justify">
+        The classifier analyzes input text and determines the three most relevant trigger warning labels which helps users, moderators, and researchers better manage sensitive content. Whether you're exploring content moderation, working in mental health, or simply concerned about digital well-being, this system supports responsible content handling and informed decision-making.
+      </p>
+    </main>
+
+    <footer class="bg-[#2c9a8e] text-white text-center text-sm py-4 mt-auto">
+      © 2025 Arenas, Nones, and Tabiolo
+    </footer>
+
+  </body>
+</html>
